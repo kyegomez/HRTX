@@ -846,7 +846,7 @@ class RTX1(nn.Module):
         except Exception as e:
             raise RuntimeError("Error in training: {}".format(e))
 
-    def run(self, video, instructions, cond_scale=1.0):
+    def forward(self, video, instructions, cond_scale=1.0):
         """
         Computes the logits for the given video and instructions using the RT1 model in evaluation mode.
 
@@ -874,50 +874,60 @@ class RTX1(nn.Module):
             raise RuntimeError("Error in evaluation: {}".format(e))
 
 
-import torch
-from torch import nn
+class MultiModalEmbedding(nn.Module):
+    def __init__(self, video_dim, text_dim):
+        super(MultiModalEmbedding, self).__init__()
+        self.video_embedding = nn.Linear(video_dim, 512)
+        self.text_embedding = nn.EmbeddingBag(text_dim, 512, sparse=True)
 
-# from rtx.rtx1 import RTX1
+    def forward(self, video, text):
+        video_embed = self.video_embedding(video)
+        text_embed = self.text_embedding(text)
+        return torch.cat([video_embed, text_embed], dim=-1)
 
-
-class DynamicRTX1(RTX1):
-    def __init__(self, num_robots, num_modalities=2, num_decoders=1):
-        super().__init__()
-        self.num_robots = num_robots
-        self.num_modalities = num_modalities
-        self.num_decoders = num_decoders
-        self.input_channels = nn.ModuleList(
-            [
-                nn.Linear(self.num_modalities, self.num_modalities)
-                for _ in range(self.num_robots)
-            ]
-        )
-        self.decoders = nn.ModuleList(
-            [
-                nn.Linear(self.num_modalities, self.num_modalities)
-                for _ in range(self.num_decoders)
-            ]
-        )
+class DynamicOutputDecoder(nn.Module):
+    def __init__(self, input_dim, robot_count):
+        super(DynamicOutputDecoder, self).__init__()
+        self.decoders = nn.ModuleList([nn.Linear(input_dim, input_dim) for _ in range(robot_count)])
 
     def forward(self, x):
-        x = [self.input_channels[i](x[i]) for i in range(self.num_robots)]
-        x = torch.stack(x, dim=0)
-        x = super().forward(x)
-        x = [self.decoders[i](x[i]) for i in range(self.num_decoders)]
-        return x
+        return [decoder(x) for decoder in self.decoders]
 
+class RTX1MultiModal(RTX1):
+    def __init__(self, robot_count, *args, **kwargs):
+        super(RTX1MultiModal, self).__init__(*args, **kwargs)
+        self.robot_count = robot_count
+        self.multi_modal_embedding = MultiModalEmbedding(224*224*3, 512)  # Assuming video_dim and text_dim
+        self.dynamic_output_decoder = DynamicOutputDecoder(512, robot_count)
 
-model = DynamicRTX1(num_robots=2)
+    def forward(self, video, instructions):
+        video = video.view(video.size(0), -1)  # Flatten the video tensor
+        x = self.multi_modal_embedding(video, instructions)
+        x = super().train(video, instructions)
+        return self.dynamic_output_decoder(x)
+
+    def multimodal_train(self, video, instructions):
+        self.train()
+        return self(video, instructions)
+
+    def multimodal_eval(self, video, instructions):
+        self.eval()
+        with torch.no_grad():
+            return self(video, instructions)
+
+# Example
+robot_count = 10
+model = RTX1MultiModal(robot_count)
 
 video = torch.randn(2, 3, 6, 224, 224)
-instructions = ["bring me that apple sitting on the table", "please pass the butter"]
+instructions = torch.randint(0, 512, (2,))  # Mock instruction data
 
 # compute the train logits
-train_logits = model(video, instructions)
+train_logits = model.multimodal_train(video, instructions)
 
 # set the model to evaluation mode
 model.eval()
 
-# compute the eval logits with a conditional scale of 3
-eval_logits = model(video, instructions, cond_scale=3.0)
-print(eval_logits.shape)
+# compute the eval logits
+eval_logits = model.multimodal_eval(video, instructions)
+print([logit.shape for logit in eval_logits])  # List of shapes for each robot's logits
