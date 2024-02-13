@@ -1,10 +1,95 @@
 [![Multi-Modality](agorabanner.png)](https://discord.gg/qUtxnK2NMf)
 
 # HRTX
-Hivemind Multi-Modality Transformer (HMMT) Model Architecture 
+Hivemind Multi-Modality Transformer (HMMT) Model Architecture. Multi-Modality Model that can ingest text and video modalities from an x amount of models at the same time and then output instructions for each robot or any N number of robots.
 
 
-Multi-Modality Model that can ingest text and video modalities from an x amount of models at the same time and then output instructions for each robot or any N number of robots
+## Install
+`pip install hrtx`
+
+## Usage
+
+### `EarlyExitTransformer` 
+There are various output heads after every transformer forward pass.
+
+```python
+import torch
+from hrtx.ee_network import EarlyExitTransformer
+
+# Input tensor
+x = torch.randn(1, 10, 512)
+
+# Create the model
+model = EarlyExitTransformer(
+    dim=512, depth=6, heads=8, dim_head=64, mlp_dim=2048, num_robots=3
+)
+
+
+# Forward pass
+output = model(x)
+
+# Print the output shape
+print(output.shape)
+
+# Output: torch.Size([1, 10, 512])
+```
+
+
+
+### `MIMOTransformer`
+Multi-Input Multi-Output Transformer model for parallel robotic execution.
+
+```python
+import torch 
+from hrtx.mimo import MIMOTransformer
+
+# Input tensor
+x = torch.randn(1, 10, 512)
+x = [x, x, x]
+
+# Create the model
+model = MIMOTransformer(
+    dim=512, depth=6, heads=8, dim_head=64, mlp_dim=2048, num_robots=3
+)
+
+
+# Forward pass
+output = model(x)
+
+# Print the output shape
+print(output)
+
+# Output: torch.Size([1, 10, 512])
+```
+
+
+
+### `SAETransformer`
+SAE: Multiple Inputs for every after then an output head.
+
+```python
+import torch
+from hrtx.sae_transformer import SAETransformer
+
+# Input tensor
+x = torch.randn(1, 10, 512)
+x = [x, x, x]
+
+# Create the model
+model = SAETransformer(
+    dim=512, depth=6, heads=8, dim_head=64, num_robots=3
+)
+
+
+# Forward pass
+output = model(x)
+
+# Print the output shape
+print(output)
+
+# Output: torch.Size([1, 10, 512])
+```
+
 
 
 
