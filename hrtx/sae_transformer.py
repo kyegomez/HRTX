@@ -1,6 +1,10 @@
 from torch import nn, Tensor
 from hrtx.transformer import Transformer
-from hrtx.main import OutputHead, MultiInputMultiModalConcatenation, SplitMultiOutput
+from hrtx.main import (
+    OutputHead,
+    MultiInputMultiModalConcatenation,
+    SplitMultiOutput,
+)
 from typing import List
 
 
@@ -36,7 +40,7 @@ class SAETransformer(nn.Module):
         dim_head: int,
         num_robots: int,
         *args,
-        **kwargs
+        **kwargs,
     ):
         super(SAETransformer, self).__init__()
         self.dim = dim
@@ -47,7 +51,12 @@ class SAETransformer(nn.Module):
 
         # Transformer network
         self.transformer = Transformer(
-            dim, dim_head=dim, heads=heads, depth=depth, *args, **kwargs
+            dim,
+            dim_head=dim,
+            heads=heads,
+            depth=depth,
+            *args,
+            **kwargs,
         )
 
         # Output head
@@ -58,7 +67,11 @@ class SAETransformer(nn.Module):
 
         # SplitMultiOutput
         self.split_output = SplitMultiOutput(
-            dim=1, num_splits=num_robots, output_dims=3, *args, **kwargs
+            dim=1,
+            num_splits=num_robots,
+            output_dims=3,
+            *args,
+            **kwargs,
         )
 
     def forward(self, x: List[Tensor]):

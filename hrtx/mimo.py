@@ -1,6 +1,10 @@
 from torch import nn, Tensor
 from hrtx.transformer import Transformer
-from hrtx.main import OutputHead, MultiInputMultiModalConcatenation, SplitMultiOutput
+from hrtx.main import (
+    OutputHead,
+    MultiInputMultiModalConcatenation,
+    SplitMultiOutput,
+)
 from typing import List
 
 
@@ -37,7 +41,7 @@ class MIMOTransformer(nn.Module):
         mlp_dim: int,
         num_robots: int,
         *args,
-        **kwargs
+        **kwargs,
     ):
         super(MIMOTransformer, self).__init__()
         self.dim = dim
@@ -49,7 +53,12 @@ class MIMOTransformer(nn.Module):
 
         # Transformer network
         self.transformer = Transformer(
-            dim, dim_head=dim, heads=heads, depth=depth, *args, **kwargs
+            dim,
+            dim_head=dim,
+            heads=heads,
+            depth=depth,
+            *args,
+            **kwargs,
         )
 
         # Output head

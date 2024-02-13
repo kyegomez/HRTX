@@ -1,6 +1,10 @@
 from torch import nn, Tensor
 from hrtx.transformer import Transformer
-from hrtx.main import OutputHead, MultiInputMultiModalConcatenation, SplitMultiOutput
+from hrtx.main import (
+    OutputHead,
+    MultiInputMultiModalConcatenation,
+    SplitMultiOutput,
+)
 from typing import List
 
 
@@ -41,7 +45,7 @@ class MIMMO(nn.Module):
         mlp_dim: int,
         num_robots: int,
         *args,
-        **kwargs
+        **kwargs,
     ):
         super(MIMMO, self).__init__()
         self.dim = dim
@@ -52,7 +56,9 @@ class MIMMO(nn.Module):
         self.num_robots = num_robots
 
         # Transformer models
-        self.transformer = Transformer(dim, dim_head, heads, depth, *args, **kwargs)
+        self.transformer = Transformer(
+            dim, dim_head, heads, depth, *args, **kwargs
+        )
 
         # Output head
         self.output_head = OutputHead(dim, -1)

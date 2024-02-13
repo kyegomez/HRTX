@@ -25,7 +25,9 @@ class MultiModalEmbedding(nn.Module):
     def __init__(self, video_dim, text_dim):
         super(MultiModalEmbedding, self).__init__()
         self.video_embedding = nn.Linear(video_dim, 512)
-        self.text_embedding = nn.EmbeddingBag(text_dim, 512, sparse=True)
+        self.text_embedding = nn.EmbeddingBag(
+            text_dim, 512, sparse=True
+        )
 
     def forward(self, video, text):
         video_embed = self.video_embedding(video)
@@ -79,7 +81,12 @@ class SplitMultiOutput(nn.Module):
     """
 
     def __init__(
-        self, dim: int, num_splits: int, output_dims: List[int], *args, **kwargs
+        self,
+        dim: int,
+        num_splits: int,
+        output_dims: List[int],
+        *args,
+        **kwargs,
     ):
         super(SplitMultiOutput, self).__init__()
         self.dim = dim
@@ -116,7 +123,9 @@ class OutputHead(nn.Module):
 
         # Linear layer for each output
         self.output_layers = nn.Sequential(
-            nn.LayerNorm(dim), nn.Linear(dim, dim), nn.Softmax(dim_range)
+            nn.LayerNorm(dim),
+            nn.Linear(dim, dim),
+            nn.Softmax(dim_range),
         )
 
     def forward(self, x: Tensor):
@@ -148,7 +157,10 @@ class DynamicOutputDecoder(nn.Module):
     def __init__(self, input_dim, robot_count):
         super(DynamicOutputDecoder, self).__init__()
         self.decoders = nn.ModuleList(
-            [nn.Linear(input_dim, input_dim) for _ in range(robot_count)]
+            [
+                nn.Linear(input_dim, input_dim)
+                for _ in range(robot_count)
+            ]
         )
 
     def forward(self, x):
@@ -185,7 +197,10 @@ class DynamicInputChannels(nn.Module):
     def __init__(self, num_robots, input_dim, output_dim):
         super(DynamicInputChannels, self).__init__()
         self.layers = nn.ModuleList(
-            [nn.Linear(input_dim, output_dim) for _ in range(num_robots)]
+            [
+                nn.Linear(input_dim, output_dim)
+                for _ in range(num_robots)
+            ]
         )
 
     def forward(self, x):
@@ -213,7 +228,10 @@ class OutputDecoders(nn.Module):
     def __init__(self, num_robots, input_dim, output_dim):
         super(OutputDecoders, self).__init__()
         self.decoders = nn.ModuleList(
-            [nn.Linear(input_dim, output_dim) for _ in range(num_robots)]
+            [
+                nn.Linear(input_dim, output_dim)
+                for _ in range(num_robots)
+            ]
         )
 
     def forward(self, x):
@@ -227,4 +245,6 @@ class OutputDecoders(nn.Module):
             torch.Tensor: Stacked output tensor from each decoder.
 
         """
-        return torch.stack([decoder(x) for decoder in self.decoders], dim=1)
+        return torch.stack(
+            [decoder(x) for decoder in self.decoders], dim=1
+        )
