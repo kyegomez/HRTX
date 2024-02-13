@@ -67,12 +67,12 @@ class MIMMO(nn.Module):
         # Reshaping connection layers
         self.c = nn.Linear(dim, dim)
 
-        # Splitting the output tensor
-        self.split_output = SplitMultiOutput(
-            dim=1,
-            num_splits=self.num_robots,
-            output_dims=[dim for _ in range(self.num_robots)],
-        )
+        # # Splitting the output tensor
+        # self.split_output = SplitMultiOutput(
+        #     dim=1,
+        #     num_splits=self.num_robots,
+
+        # )
 
     def forward(self, x: List[Tensor]):
         """
@@ -84,7 +84,10 @@ class MIMMO(nn.Module):
         Returns:
             List[Tensor]: List of output tensors.
         """
+        # b, s, d = x.shape
         x = self.multi_input(x)
+
+        b, s, d = x.shape
 
         # Transformer forward pass
         for _ in range(self.depth):
@@ -96,7 +99,10 @@ class MIMMO(nn.Module):
         x = self.output_head(x) + skip
 
         # Split the output tensor
-        x = self.split_output(x)
+        # x = self.split_output(x)
+        x = SplitMultiOutput(
+            dim=1, num_splits=self.num_robots, output_dims=[s]
+        )(x)
 
         return x
 

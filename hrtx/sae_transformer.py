@@ -87,6 +87,7 @@ class SAETransformer(nn.Module):
         """
         x = self.multi_input(x)
         print(x.shape)
+        b, s, d = x.shape
 
         for _ in range(self.num_robots):
             x = self.transformer(x)
