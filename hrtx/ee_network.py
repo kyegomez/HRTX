@@ -33,7 +33,6 @@ class EarlyExitTransformer(nn.Module):
         depth: int,
         heads: int,
         dim_head: int,
-        mlp_dim: int,
         num_robots: int,
     ):
         super(EarlyExitTransformer, self).__init__()
@@ -41,7 +40,6 @@ class EarlyExitTransformer(nn.Module):
         self.depth = depth
         self.heads = heads
         self.dim_head = dim_head
-        self.mlp_dim = mlp_dim
         self.num_robots = num_robots
 
         self.transformer = Transformer(
