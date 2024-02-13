@@ -21,7 +21,7 @@ x = torch.randn(1, 10, 512)
 
 # Create the model
 model = EarlyExitTransformer(
-    dim=512, depth=6, heads=8, dim_head=64, mlp_dim=2048, num_robots=3
+    dim=512, depth=6, heads=8, dim_head=64, num_robots=3
 )
 
 
@@ -49,7 +49,7 @@ x = [x, x, x]
 
 # Create the model
 model = MIMOTransformer(
-    dim=512, depth=6, heads=8, dim_head=64, mlp_dim=2048, num_robots=3
+    dim=512, depth=6, heads=8, dim_head=64, num_robots=3
 )
 
 
