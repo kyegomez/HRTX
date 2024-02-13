@@ -65,11 +65,6 @@ class MIMOTransformer(nn.Module):
         # Multi Input Multi Modal Concatenation
         self.multi_input = MultiInputMultiModalConcatenation(dim=1)
 
-        # SplitMultiOutput
-        self.split_output = SplitMultiOutput(
-            dim=1, num_splits=3, output_dims=3, *args, **kwargs
-        )
-
     def forward(self, x: List[Tensor]):
         """
         Forward pass of the EarlyExitTransformer.
@@ -83,6 +78,7 @@ class MIMOTransformer(nn.Module):
         """
         x = self.multi_input(x)
         print(x.shape)
+        b, s, d = x.shape
 
         for _ in range(self.num_robots):
             x = self.transformer(x)
@@ -90,7 +86,12 @@ class MIMOTransformer(nn.Module):
 
         split = self.output_head(x)
 
-        return self.split_output(split)
+        # return self.split_output(split)
+        out = SplitMultiOutput(
+            dim=1, num_splits=self.num_robots, output_dims=s
+        )(split)
+
+        return out
 
 
 # # Input tensor

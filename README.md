@@ -88,6 +88,7 @@ output = model(x)
 print(output)
 
 # Output: torch.Size([1, 10, 512])
+
 ```
 
 
