@@ -89,18 +89,14 @@ class SAETransformer(nn.Module):
         print(x.shape)
         b, s, d = x.shape
 
+        outputs = []
         for _ in range(self.depth):
-            x = self.transformer(x)
+            transform = self.transformer(x)
             print(x)
-            x = self.output_head(x)
+            x = self.output_head(transform)
             print(x)
-            out = SplitMultiOutput(
-                dim=1,
-                num_splits=self.num_robots,
-                output_dims=s,
-            )(x)
-            x = self.transformer(x)
+            out = self.split_output(x)
+            outputs.append(out)
+            x = self.transformer(transform)
 
-        # split = self.output_head(x)
-
-        return x, out
+        return x, outputs
