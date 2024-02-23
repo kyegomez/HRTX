@@ -13,25 +13,28 @@ Hivemind Multi-Modality Transformer (HMMT) Model Architecture. Multi-Modality Mo
 There are various output heads after every transformer forward pass.
 
 ```python
-import torch
+import torch 
 from hrtx.ee_network import EarlyExitTransformer
 
-# Input tensor
-x = torch.randn(1, 10, 512)
+# Input tensor - tokens int
+token = torch.randint(0, 1000, (1, 10))
 
 # Create the model
 model = EarlyExitTransformer(
-    dim=512, depth=6, heads=8, dim_head=64, num_robots=3
+    dim=512, depth=6,
+    num_tokens=1000, seq_len=10,
+    heads=8, dim_head=64, num_robots=3
 )
 
 
 # Forward pass
-output = model(x)
+output = model(token)
 
 # Print the output shape
 print(output.shape)
 
 # Output: torch.Size([1, 10, 512])
+
 ```
 
 
@@ -91,6 +94,34 @@ print(output)
 
 ```
 
+
+### `MIMMO`
+```python
+import torch
+from hrtx.mimmo import MIMMO
+
+
+# Usage of the MIMMO module
+x = [torch.randint(0, 1000, (1, 10)) for _ in range(3)]
+
+
+# Create the model
+model = MIMMO(
+    dim=512,
+    depth=6,
+    num_tokens=1000,
+    seq_len=10,
+    heads=8,
+    dim_head=64,
+    num_robots=3,
+)
+
+# Forward pass
+output = model(x)
+
+# Print the output shape
+print(output[0].shape)
+``` 
 
 
 

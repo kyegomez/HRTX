@@ -43,6 +43,8 @@ class MIMMO(nn.Module):
         heads: int,
         dim_head: int,
         num_robots: int,
+        num_tokens: int,
+        seq_len: int,
         *args,
         **kwargs,
     ):
@@ -52,6 +54,8 @@ class MIMMO(nn.Module):
         self.heads = heads
         self.dim_head = dim_head
         self.num_robots = num_robots
+        self.num_tokens = num_tokens
+        self.seq_len = seq_len
 
         # Transformer models
         self.transformer = Transformer(
@@ -74,6 +78,9 @@ class MIMMO(nn.Module):
 
         # )
 
+        # Token embeddings
+        self.embed = nn.Embedding(num_tokens, dim)
+
     def forward(self, x: List[Tensor]):
         """
         Forward pass of the MIMMO module.
@@ -84,6 +91,9 @@ class MIMMO(nn.Module):
         Returns:
             List[Tensor]: List of output tensors.
         """
+        for i in range(len(x)):
+            x[i] = self.embed(x[i])
+
         # b, s, d = x.shape
         x = self.multi_input(x)
 
@@ -107,10 +117,23 @@ class MIMMO(nn.Module):
         return x
 
 
-# x = torch.rand(3, 4, 5)
-# y = torch.rand(3, 4, 5)
-# z = torch.rand(3, 4, 5)
-# model = MIMMO(5, 3, 4, 4, 5, 3)
-# model([x, y, z])
-# # Output:
-# # torch.Size([3, 4, 5])
+# # Usage of the MIMMO module
+# x = [torch.randint(0, 1000, (1, 10)) for _ in range(3)]
+
+
+# # Create the model
+# model = MIMMO(
+#     dim=512,
+#     depth=6,
+#     num_tokens=1000,
+#     seq_len=10,
+#     heads=8,
+#     dim_head=64,
+#     num_robots=3,
+# )
+
+# # Forward pass
+# output = model(x)
+
+# # Print the output shape
+# print(output[0].shape)

@@ -1,4 +1,5 @@
-from torch import nn, Tensor
+import torch
+from torch import nn
 from hrtx.transformer import Transformer
 from hrtx.main import OutputHead
 
@@ -32,6 +33,8 @@ class EarlyExitTransformer(nn.Module):
         dim: int,
         depth: int,
         heads: int,
+        num_tokens: int,
+        seq_len: int,
         dim_head: int,
         num_robots: int,
     ):
@@ -39,6 +42,8 @@ class EarlyExitTransformer(nn.Module):
         self.dim = dim
         self.depth = depth
         self.heads = heads
+        self.max_tokens = num_tokens
+        self.max_seq_len = seq_len
         self.dim_head = dim_head
         self.num_robots = num_robots
 
@@ -52,7 +57,10 @@ class EarlyExitTransformer(nn.Module):
         # Output head
         self.output_head = OutputHead(dim, -1)
 
-    def forward(self, x: Tensor):
+        # Token embeddings
+        self.embed = nn.Embedding(num_tokens, dim)
+
+    def forward(self, x):
         """
         Forward pass of the EarlyExitTransformer.
 
@@ -63,6 +71,8 @@ class EarlyExitTransformer(nn.Module):
             Tensor: The output tensor.
 
         """
+        x = self.embed(x)
+
         for _ in range(self.depth):
             x = self.transformer(x)
             print(x)
@@ -70,22 +80,29 @@ class EarlyExitTransformer(nn.Module):
             print(x)
             # Add to outputs list
             return x
+
         # return self.output_head(x)
 
 
-# # Input tensor
-# x = torch.randn(1, 10, 512)
+# Input tensor - tokens int
+token = torch.randint(0, 1000, (1, 10))
 
-# # Create the model
-# model = EarlyExitTransformer(
-#     dim=512, depth=6, heads=8, dim_head=64, mlp_dim=2048, num_robots=3
-# )
+# Create the model
+model = EarlyExitTransformer(
+    dim=512,
+    depth=6,
+    num_tokens=1000,
+    seq_len=10,
+    heads=8,
+    dim_head=64,
+    num_robots=3,
+)
 
 
-# # Forward pass
-# output = model(x)
+# Forward pass
+output = model(token)
 
-# # Print the output shape
-# print(output.shape)
+# Print the output shape
+print(output.shape)
 
-# # Output: torch.Size([1, 10, 512])
+# Output: torch.Size([1, 10, 512])
